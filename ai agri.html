@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriChain | Farm-to-Market Intelligence</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #5A5A40;
+            --primary-dark: #4A4A30;
+            --primary-light: #F5F5F0;
+            --accent: #D4D4C8;
+            --text-main: #1A1A1A;
+            --text-muted: #666666;
+            --bg-white: #FFFFFF;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
+            --radius-lg: 24px;
+            --radius-md: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-white);
+            color: var(--text-main);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            padding-bottom: 80px; /* Space for ticker */
+        }
+
+        .serif {
+            font-family: 'Cormorant Garamond', serif;
+        }
+
+        /* Layout */
+        header {
+            padding: 1.5rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo span {
+            color: var(--primary);
+            font-style: italic;
+            font-family: 'Cormorant Garamond', serif;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 3rem 5%;
+        }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            margin-bottom: 4rem;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 8vw, 4.5rem);
+            line-height: 1;
+            margin-bottom: 1.5rem;
+            font-weight: 300;
+            letter-spacing: -2px;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-white);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+        }
+
+        .card-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        /* Form Elements */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+        }
+
+        select, input {
+            padding: 0.8rem 1rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.2s;
+            background-color: #FAFAFA;
+        }
+
+        select:focus, input:focus {
+            border-color: var(--primary);
+            background-color: #FFF;
+            box-shadow: 0 0 0 3px rgba(90, 90, 64, 0.1);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 9999px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            width: 100%;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 14px 0 rgba(90, 90, 64, 0.3);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(90, 90, 64, 0.4);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            font-size: 0.75rem;
+            padding: 0.5rem 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-outline:hover {
+            background: var(--primary-light);
+        }
+
+        /* Results Section */
+        #resultsSection {
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease-out;
+        }
+
+        #resultsSection.visible {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .stat-box {
+            background: var(--primary-light);
+            padding: 1.5rem;
+            border-radius: var(--radius-md);
+            text-align: center;
+            border: 1px solid rgba(90, 90, 64, 0.1);
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .mandi-card {
+            border-left: 4px solid var(--primary);
+            padding: 1.5rem;
+            background: #FAFAFA;
+            border-radius: 16px;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s;
+        }
+
+        .mandi-card:hover {
+            transform: translateX(5px);
+            background: #F5F5F5;
+        }
+
+        /* Risk Badge */
+        .risk-badge {
+            padding: 0.3rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .risk-high { background: #FEE2E2; color: #991B1B; }
+        .risk-med { background: #FEF3C7; color: #92400E; }
+        .risk-low { background: #DCFCE7; color: #166534; }
+
+        /* Price Ticker */
+        .price-ticker {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid var(--border-color);
+            padding: 0.8rem;
+            display: flex;
+            overflow: hidden;
+            white-space: nowrap;
+            z-index: 1000;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
+        }
+
+        .ticker-content {
+            display: inline-block;
+            animation: ticker 40s linear infinite;
+        }
+
+        @keyframes ticker {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        .ticker-item {
+            display: inline-block;
+            margin-right: 3rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .price-up { color: #10B981; }
+        .price-down { color: #EF4444; }
+
+        /* Chart */
+        .chart-container {
+            height: 350px;
+            margin-top: 1rem;
+        }
+
+        /* Loading */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--primary-light);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        footer {
+            text-align: center;
+            padding: 3rem 0;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 3rem; }
+            .card { padding: 1.5rem; }
+            .form-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="loading-overlay" id="loader">
+        <div class="spinner"></div>
+        <p style="margin-top: 1.5rem; font-weight: 600; letter-spacing: 0.5px;">AI ANALYZING MARKET CONDITIONS...</p>
+    </div>
+
+    <header>
+        <div class="logo">Agri<span>Chain</span></div>
+        <div style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase;">Farm-to-Market Intelligence</div>
+    </header>
+
+    <div class="container">
+        <section class="hero">
+            <h1 class="serif">Optimize your harvest.<br>Maximize your profit.</h1>
+            <p>AgriChain uses predictive AI to help Indian farmers time their harvest and select the most profitable mandis in real-time.</p>
+        </section>
+
+        <!-- Input Form -->
+        <section class="card">
+            <div class="card-header">
+                <div>
+                    <h2 class="serif card-title">Farm Intelligence Input</h2>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">Provide your crop details for a precision report.</p>
+                </div>
+                <button class="btn btn-outline" onclick="detectLocation()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                    Detect My Location
+                </button>
+            </div>
+
+            <form id="agriForm">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Crop Type</label>
+                        <select id="cropType" required>
+                            <option value="">Select Crop</option>
+                            <option value="Wheat">Wheat</option>
+                            <option value="Rice">Rice</option>
+                            <option value="Tomato">Tomato</option>
+                            <option value="Onion">Onion</option>
+                            <option value="Potato">Potato</option>
+                            <option value="Cotton">Cotton</option>
+                            <option value="Sugarcane">Sugarcane</option>
+                            <option value="Maize">Maize</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Quantity (Quintals)</label>
+                        <input type="number" id="quantity" placeholder="e.g. 100" required>
+                    </div>
+                    <div class="input-group">
+                        <label>State</label>
+                        <select id="stateSelect" required onchange="updateDistricts()">
+                            <option value="">Select State</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>District</label>
+                        <select id="districtSelect" required>
+                            <option value="">Select District</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Harvest Date</label>
+                        <input type="date" id="harvestDate" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Storage Type</label>
+                        <select id="storageType" required>
+                            <option value="Open Field">Open Field</option>
+                            <option value="Ventilated Shed">Ventilated Shed</option>
+                            <option value="Jute Bags">Jute Bags</option>
+                            <option value="Cold Storage">Cold Storage</option>
+                            <option value="Plastic Crates">Plastic Crates</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Transit Time (Hours)</label>
+                        <input type="number" id="transitTime" placeholder="e.g. 6" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Get Intelligence Report</button>
+            </form>
+        </section>
+
+        <!-- Results Section -->
+        <section id="resultsSection">
+            <div class="results-grid">
+                <!-- Harvest Window -->
+                <div class="card">
+                    <h3 class="serif" style="font-size: 1.5rem; margin-bottom: 1.5rem;">Optimal Harvest Window</h3>
+                    <div class="stat-box">
+                        <p class="stat-label">Recommended Dates</p>
+                        <p id="resHarvestDates" class="stat-value">--</p>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">Based on maturity index and weather forecast.</p>
+                    </div>
+                </div>
+
+                <!-- Spoilage Risk -->
+                <div class="card">
+                    <h3 class="serif" style="font-size: 1.5rem; margin-bottom: 1.5rem;">Spoilage Risk Engine</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <span id="resRiskBadge" class="risk-badge">--</span>
+                        <span id="resRiskProb" style="font-weight: 700; font-size: 1.4rem;">--</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div style="background: #F9F9F9; padding: 1rem; border-radius: 12px; border: 1px solid var(--border-color);">
+                            <p class="stat-label">Shelf Life</p>
+                            <p id="resShelfLife" style="font-weight: 600;">--</p>
+                        </div>
+                        <div style="background: #F9F9F9; padding: 1rem; border-radius: 12px; border: 1px solid var(--border-color);">
+                            <p class="stat-label">Est. Loss</p>
+                            <p id="resEstLoss" style="font-weight: 600; color: #EF4444;">--</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mandis -->
+            <div class="card">
+                <h3 class="serif" style="font-size: 1.5rem; margin-bottom: 1.5rem;">Top Recommended Mandis</h3>
+                <div id="mandiList">
+                    <!-- Mandis injected here -->
+                </div>
+            </div>
+
+            <!-- Preservation -->
+            <div class="card">
+                <h3 class="serif" style="font-size: 1.5rem; margin-bottom: 1.5rem;">Preservation Strategies</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+                    <div>
+                        <p class="stat-label" style="color: #10B981;">Low Cost Solutions</p>
+                        <p id="stratLow" style="font-size: 0.9rem; color: var(--text-muted);"></p>
+                    </div>
+                    <div>
+                        <p class="stat-label" style="color: #F59E0B;">Medium Cost Solutions</p>
+                        <p id="stratMed" style="font-size: 0.9rem; color: var(--text-muted);"></p>
+                    </div>
+                    <div>
+                        <p class="stat-label" style="color: #EF4444;">High Cost Solutions</p>
+                        <p id="stratHigh" style="font-size: 0.9rem; color: var(--text-muted);"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Graph -->
+            <div class="card">
+                <h3 class="serif" style="font-size: 1.5rem; margin-bottom: 0.5rem;">Market Price Trend</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">7-day historical and projected price movement for your primary Mandi.</p>
+                <div class="chart-container">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 AgriChain Farm-to-Market Intelligence. Empowering India's Farmers.</p>
+    </footer>
+
+    <!-- Price Ticker -->
+    <div class="price-ticker">
+        <div class="ticker-content" id="tickerContent">
+            <!-- Ticker items injected here -->
+        </div>
+    </div>
+
+    <script>
+        // Data: States and Districts
+        const stateData = {
+            "Andhra Pradesh": ["Anantapur", "Chittoor", "East Godavari", "Guntur", "Krishna", "Kurnool", "Prakasam", "Srikakulam", "Visakhapatnam", "Vizianagaram", "West Godavari", "YSR Kadapa"],
+            "Arunachal Pradesh": ["Tawang", "West Kameng", "East Kameng", "Papum Pare", "Kurung Kumey", "Kra Daadi", "Lower Subansiri", "Upper Subansiri", "West Siang", "East Siang", "Siang", "Upper Siang", "Lower Siang", "Lower Dibang Valley", "Upper Dibang Valley", "Anjaw", "Lohit", "Namsai", "Changlang", "Tirap", "Longding"],
+            "Assam": ["Baksa", "Barpeta", "Biswanath", "Bongaigaon", "Cachar", "Charaideo", "Chirang", "Darrang", "Dhemaji", "Dhubri", "Dibrugarh", "Goalpara", "Golaghat", "Hailakandi", "Hojai", "Jorhat", "Kamrup Metropolitan", "Kamrup", "Karbi Anglong", "Karimganj", "Kokrajhar", "Lakhimpur", "Majuli", "Morigaon", "Nagaon", "Nalbari", "Dima Hasao", "Sivasagar", "Sonitpur", "South Salmara-Mankachar", "Tinsukia", "Udalguri", "West Karbi Anglong"],
+            "Bihar": ["Araria", "Arwal", "Aurangabad", "Banka", "Begusarai", "Bhagalpur", "Bhojpur", "Buxar", "Darbhanga", "East Champaran", "Gaya", "Gopalganj", "Jamui", "Jehanabad", "Kaimur", "Katihar", "Khagaria", "Kishanganj", "Lakhisarai", "Madhepura", "Madhubani", "Munger", "Muzaffarpur", "Nalanda", "Nawada", "Patna", "Purnia", "Rohtas", "Saharsa", "Samastipur", "Saran", "Sheikhpura", "Sheohar", "Sitamarhi", "Siwan", "Supaul", "Vaishali", "West Champaran"],
+            "Chhattisgarh": ["Balod", "Baloda Bazar", "Balrampur", "Bastar", "Bemetara", "Bijapur", "Bilaspur", "Dantewada", "Dhamtari", "Durg", "Gariaband", "Janjgir-Champa", "Jashpur", "Kabirdham", "Kanker", "Kondagaon", "Korba", "Korea", "Mahasamund", "Mungeli", "Narayanpur", "Raigarh", "Raipur", "Rajnandgaon", "Sukma", "Surajpur", "Surguja"],
+            "Goa": ["North Goa", "South Goa"],
+            "Gujarat": ["Ahmedabad", "Amreli", "Anand", "Aravalli", "Banas Kantha", "Bharuch", "Bhavnagar", "Botad", "Chhota Udaipur", "Dahod", "Dang", "Devbhumi Dwarka", "Gandhinagar", "Gir Somnath", "Jamnagar", "Junagadh", "Kachchh", "Kheda", "Mahisagar", "Mehsana", "Morbi", "Narmada", "Navsari", "Panch Mahals", "Patan", "Porbandar", "Rajkot", "Sabar Kantha", "Surat", "Surendranagar", "Tapi", "Vadodara", "Valsad"],
+            "Haryana": ["Ambala", "Bhiwani", "Charkhi Dadri", "Faridabad", "Fatehabad", "Gurugram", "Hisar", "Jhajjar", "Jind", "Kaithal", "Karnal", "Kurukshetra", "Mahendragarh", "Nuh", "Palwal", "Panchkula", "Panipat", "Rewari", "Rohtak", "Sirsa", "Sonipat", "Yamunanagar"],
+            "Himachal Pradesh": ["Bilaspur", "Chamba", "Hamirpur", "Kangra", "Kinnaur", "Kullu", "Lahaul & Spiti", "Mandi", "Shimla", "Sirmaur", "Solan", "Una"],
+            "Jharkhand": ["Bokaro", "Chatra", "Deoghar", "Dhanbad", "Dumka", "East Singhbhum", "Garhwa", "Giridih", "Godda", "Gumla", "Hazaribagh", "Jamtara", "Khunti", "Koderma", "Latehar", "Lohardaga", "Pakur", "Palamu", "Ramgarh", "Ranchi", "Sahibganj", "Seraikela-Kharsawan", "Simdega", "West Singhbhum"],
+            "Karnataka": ["Bagalkot", "Ballari", "Belagavi", "Bengaluru Rural", "Bengaluru Urban", "Bidar", "Chamarajanagar", "Chikkaballapur", "Chikkamagaluru", "Chitradurga", "Dakshina Kannada", "Davangere", "Dharwad", "Gadag", "Hassan", "Haveri", "Kalaburagi", "Kodagu", "Kolar", "Koppal", "Mandya", "Mysuru", "Raichur", "Ramanagara", "Shivamogga", "Tumakuru", "Udupi", "Uttara Kannada", "Vijayapura", "Yadgir"],
+            "Kerala": ["Alappuzha", "Ernakulam", "Idukki", "Kannur", "Kasaragod", "Kollam", "Kottayam", "Kozhikode", "Malappuram", "Palakkad", "Pathanamthitta", "Thiruvananthapuram", "Thrissur", "Wayanad"],
+            "Madhya Pradesh": ["Agar Malwa", "Alirajpur", "Anuppur", "Ashoknagar", "Balaghat", "Barwani", "Betul", "Bhind", "Bhopal", "Burhanpur", "Chhatarpur", "Chhindwara", "Damoh", "Datia", "Dewas", "Dhar", "Dindori", "Guna", "Gwalior", "Harda", "Hoshangabad", "Indore", "Jabalpur", "Jhabua", "Katni", "Khandwa", "Khargone", "Mandla", "Mandsaur", "Morena", "Narsinghpur", "Neemuch", "Panna", "Raisen", "Rajgarh", "Ratlam", "Rewa", "Sagar", "Satna", "Sehore", "Seoni", "Shahdol", "Shajapur", "Sheopur", "Shivpuri", "Sidhi", "Singrauli", "Tikamgarh", "Ujjain", "Umaria", "Vidisha"],
+            "Maharashtra": ["Ahmednagar", "Akola", "Amravati", "Aurangabad", "Beed", "Bhandara", "Buldhana", "Chandrapur", "Dhule", "Gadchiroli", "Gondia", "Hingoli", "Jalgaon", "Jalna", "Kolhapur", "Latur", "Mumbai City", "Mumbai Suburban", "Nagpur", "Nanded", "Nandurbar", "Nashik", "Osmanabad", "Palghar", "Parbhani", "Pune", "Raigad", "Ratnagiri", "Sangli", "Satara", "Sindhudurg", "Solapur", "Thane", "Wardha", "Washim", "Yavatmal"],
+            "Manipur": ["Bishnupur", "Chandel", "Churachandpur", "Imphal East", "Imphal West", "Jiribam", "Kakching", "Kamjong", "Kangpokpi", "Noney", "Pherzawl", "Senapati", "Tamenglong", "Tengnoupal", "Thoubal", "Ukhrul"],
+            "Meghalaya": ["East Garo Hills", "East Jaintia Hills", "East Khasi Hills", "North Garo Hills", "Ri Bhoi", "South Garo Hills", "South West Garo Hills", "South West Khasi Hills", "West Garo Hills", "West Jaintia Hills", "West Khasi Hills"],
+            "Mizoram": ["Aizawl", "Champhai", "Kolasib", "Lawngtlai", "Lunglei", "Mamit", "Saiha", "Serchhip"],
+            "Nagaland": ["Dimapur", "Kiphire", "Kohima", "Longleng", "Mokokchung", "Mon", "Peren", "Phek", "Tuensang", "Wokha", "Zunheboto"],
+            "Odisha": ["Angul", "Balangir", "Balasore", "Bargarh", "Bhadrak", "Baudh", "Cuttack", "Deogarh", "Dhenkanal", "Gajapati", "Ganjam", "Jagatsinghpur", "Jajpur", "Jharsuguda", "Kalahandi", "Kandhamal", "Kendrapara", "Kendujhar", "Khordha", "Koraput", "Malkangiri", "Mayurbhanj", "Nabarangpur", "Nayagarh", "Nuapada", "Puri", "Rayagada", "Sambalpur", "Sonepur", "Sundargarh"],
+            "Punjab": ["Amritsar", "Barnala", "Bathinda", "Faridkot", "Fatehgarh Sahib", "Fazilka", "Ferozepur", "Gurdaspur", "Hoshiarpur", "Jalandur", "Kapurthala", "Ludhiana", "Mansa", "Moga", "Muktsar", "Pathankot", "Patiala", "Rupnagar", "Sahibzada Ajit Singh Nagar", "Sangrur", "Shahid Bhagat Singh Nagar", "Sri Muktsar Sahib", "Tarn Taran"],
+            "Rajasthan": ["Ajmer", "Alwar", "Banswara", "Baran", "Barmer", "Bharatpur", "Bhilwara", "Bikaner", "Bundi", "Chittorgarh", "Churu", "Dausa", "Dholpur", "Dungarpur", "Hanumangarh", "Jaipur", "Jaisalmer", "Jalore", "Jhalawar", "Jhunjhunu", "Jodhpur", "Karauli", "Kota", "Nagaur", "Pali", "Pratapgarh", "Rajsamand", "Sawai Madhopur", "Sikar", "Sirohi", "Sri Ganganagar", "Tonk", "Udaipur"],
+            "Sikkim": ["East Sikkim", "North Sikkim", "South Sikkim", "West Sikkim"],
+            "Tamil Nadu": ["Ariyalur", "Chengalpattu", "Chennai", "Coimbatore", "Cuddalore", "Dharmapuri", "Dindigul", "Erode", "Kallakurichi", "Kanchipuram", "Kanyakumari", "Karur", "Krishnagiri", "Madurai", "Mayiladuthurai", "Nagapattinam", "Namakkal", "Nilgiris", "Pudukkottai", "Ramanathapuram", "Ranipet", "Salem", "Sivaganga", "Tenkasi", "Thanjavur", "Theni", "Thoothukudi", "Tiruchirappalli", "Tirunelveli", "Tirupathur", "Tiruppur", "Tiruvallur", "Tiruvannamalai", "Tiruvarur", "Vellore", "Viluppuram", "Virudhunagar"],
+            "Telangana": ["Adilabad", "Bhadradri Kothagudem", "Hyderabad", "Jagtial", "Jangaon", "Jayashankar Bhupalpally", "Jogulamba Gadwal", "Kamareddy", "Karimnagar", "Khammam", "Kumuram Bheem", "Mahabubabad", "Mahabubnagar", "Mancherial", "Medak", "Medchal", "Mulugu", "Nagarkurnool", "Nalgonda", "Narayanpet", "Nirmal", "Nizamabad", "Peddapalli", "Rajanna Sircilla", "Rangareddy", "Sangareddy", "Siddipet", "Suryapet", "Vikarabad", "Wanaparthy", "Warangal Rural", "Warangal Urban", "Yadadri Bhuvanagiri"],
+            "Tripura": ["Dhalai", "Gomati", "Khowai", "North Tripura", "Sepahijala", "South Tripura", "Unakoti", "West Tripura"],
+            "Uttar Pradesh": ["Agra", "Aligarh", "Allahabad", "Ambedkar Nagar", "Amethi", "Amroha", "Auraiya", "Azamgarh", "Baghpat", "Bahraich", "Ballia", "Balrampur", "Banda", "Barabanki", "Bareilly", "Basti", "Bhadohi", "Bijnor", "Budaun", "Bulandshahr", "Chandauli", "Chitrakoot", "Deoria", "Etah", "Etawah", "Faizabad", "Farrukhabad", "Fatehpur", "Firozabad", "Gautam Buddha Nagar", "Ghaziabad", "Ghazipur", "Gonda", "Gorakhpur", "Hamirpur", "Hapur", "Hardoi", "Hathras", "Jalaun", "Jaunpur", "Jhansi", "Kannauj", "Kanpur Dehat", "Kanpur Nagar", "Kasganj", "Kaushambi", "Kheri", "Kushinagar", "Lalitpur", "Lucknow", "Maharajganj", "Mahoba", "Mainpuri", "Mathura", "Mau", "Meerut", "Mirzapur", "Moradabad", "Muzaffarnagar", "Pilibhit", "Pratapgarh", "Raebareli", "Rampur", "Saharanpur", "Sambhal", "Sant Kabir Nagar", "Shahjahanpur", "Shamli", "Shravasti", "Siddharthnagar", "Sitapur", "Sonbhadra", "Sultanpur", "Unnao", "Varanasi"],
+            "Uttarakhand": ["Almora", "Bageshwar", "Chamoli", "Champawat", "Dehradun", "Haridwar", "Nainital", "Pauri Garhwal", "Pithoragarh", "Rudraprayag", "Tehri Garhwal", "Udham Singh Nagar", "Uttarkashi"],
+            "West Bengal": ["Alipurduar", "Bankura", "Birbhum", "Cooch Behar", "Dakshin Dinajpur", "Darjeeling", "Hooghly", "Howrah", "Jalpaiguri", "Jhargram", "Kalimpong", "Kolkata", "Malda", "Murshidabad", "Nadia", "North 24 Parganas", "Paschim Bardhaman", "Paschim Medinipur", "Purba Bardhaman", "Purba Medinipur", "Purulia", "South 24 Parganas", "Uttar Dinajpur"]
+        };
+
+        const cropBasePrices = {
+            "Wheat": 2150, "Rice": 2600, "Tomato": 1400, "Onion": 1900,
+            "Potato": 1100, "Cotton": 6800, "Sugarcane": 380, "Maize": 2050
+        };
+
+        let currentPrices = { ...cropBasePrices };
+        let chart = null;
+
+        // Initialize State Dropdown
+        const stateSelect = document.getElementById('stateSelect');
+        Object.keys(stateData).sort().forEach(state => {
+            const option = document.createElement('option');
+            option.value = state;
+            option.textContent = state;
+            stateSelect.appendChild(option);
+        });
+
+        function updateDistricts() {
+            const state = stateSelect.value;
+            const districtSelect = document.getElementById('districtSelect');
+            districtSelect.innerHTML = '<option value="">Select District</option>';
+            
+            if (state && stateData[state]) {
+                stateData[state].sort().forEach(dist => {
+                    const option = document.createElement('option');
+                    option.value = dist;
+                    option.textContent = dist;
+                    districtSelect.appendChild(option);
+                });
+            }
+        }
+
+        async function detectLocation() {
+            if (!navigator.geolocation) {
+                alert("Geolocation is not supported by your browser.");
+                return;
+            }
+
+            document.getElementById('loader').style.display = 'flex';
+            
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                const { latitude, longitude } = position.coords;
+                try {
+                    // Using a public reverse geocoding API
+                    const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`);
+                    const data = await response.json();
+                    
+                    if (data.principalSubdivision) {
+                        const detectedState = data.principalSubdivision;
+                        const detectedCity = data.city || data.locality;
+                        
+                        // Match state
+                        const stateMatch = Object.keys(stateData).find(s => s.toLowerCase().includes(detectedState.toLowerCase()));
+                        if (stateMatch) {
+                            stateSelect.value = stateMatch;
+                            updateDistricts();
+                            
+                            // Match district
+                            const distMatch = stateData[stateMatch].find(d => d.toLowerCase().includes(detectedCity.toLowerCase()));
+                            if (distMatch) {
+                                document.getElementById('districtSelect').value = distMatch;
+                            }
+                        }
+                        alert(`Location Detected: ${detectedCity}, ${detectedState} (PIN: ${data.postcode || 'N/A'})`);
+                    }
+                } catch (e) {
+                    console.error(e);
+                    alert("Could not resolve address automatically. Please select manually.");
+                } finally {
+                    document.getElementById('loader').style.display = 'none';
+                }
+            }, () => {
+                alert("Location access denied.");
+                document.getElementById('loader').style.display = 'none';
+            });
+        }
+
+        function updateTicker() {
+            const ticker = document.getElementById('tickerContent');
+            ticker.innerHTML = '';
+            
+            Object.entries(currentPrices).forEach(([crop, price]) => {
+                const change = (Math.random() * 4 - 2).toFixed(1);
+                const isUp = change >= 0;
+                const item = document.createElement('div');
+                item.className = 'ticker-item';
+                item.innerHTML = `${crop}: ₹${price.toFixed(0)} <span class="${isUp ? 'price-up' : 'price-down'}">${isUp ? '▲' : '▼'} ${Math.abs(change)}%</span>`;
+                ticker.appendChild(item);
+                
+                // Slightly update prices for next cycle
+                currentPrices[crop] = Math.max(100, price + (parseFloat(change) * 2));
+            });
+        }
+
+        // Ticker updates every 5 seconds
+        setInterval(updateTicker, 5000);
+        updateTicker();
+
+        document.getElementById('agriForm').onsubmit = function(e) {
+            e.preventDefault();
+            const loader = document.getElementById('loader');
+            loader.style.display = 'flex';
+
+            setTimeout(() => {
+                loader.style.display = 'none';
+                generateReport();
+            }, 1800);
+        };
+
+        function generateReport() {
+            const crop = document.getElementById('cropType').value;
+            const qty = parseFloat(document.getElementById('quantity').value);
+            const district = document.getElementById('districtSelect').value;
+            const basePrice = currentPrices[crop] || 2000;
+
+            const results = document.getElementById('resultsSection');
+            results.style.display = 'block';
+            setTimeout(() => results.classList.add('visible'), 50);
+            results.scrollIntoView({ behavior: 'smooth' });
+
+            // Harvest Window
+            const hDate = new Date(document.getElementById('harvestDate').value);
+            const start = new Date(hDate); start.setDate(hDate.getDate() - 3);
+            const end = new Date(hDate); end.setDate(hDate.getDate() + 4);
+            document.getElementById('resHarvestDates').textContent = `${start.toLocaleDateString('en-IN', {day:'2-digit', month:'short'})} - ${end.toLocaleDateString('en-IN', {day:'2-digit', month:'short'})}`;
+
+            // Spoilage Risk
+            const risk = Math.floor(Math.random() * 45) + 5;
+            const riskProb = document.getElementById('resRiskProb');
+            const riskBadge = document.getElementById('resRiskBadge');
+            riskProb.textContent = `${risk}%`;
+            
+            if (risk < 15) {
+                riskBadge.textContent = 'Low Risk';
+                riskBadge.className = 'risk-badge risk-low';
+            } else if (risk < 30) {
+                riskBadge.textContent = 'Medium Risk';
+                riskBadge.className = 'risk-badge risk-med';
+            } else {
+                riskBadge.textContent = 'High Risk';
+                riskBadge.className = 'risk-badge risk-high';
+            }
+
+            document.getElementById('resShelfLife').textContent = `${Math.floor(Math.random() * 12) + 6} Days`;
+            const loss = Math.floor((risk/100) * basePrice * qty);
+            document.getElementById('resEstLoss').textContent = `₹${loss.toLocaleString('en-IN')}`;
+
+            // Mandis
+            const mandiList = document.getElementById('mandiList');
+            mandiList.innerHTML = '';
+            const mandis = [
+                { name: `${district} APMC`, price: basePrice + 45, dist: '8 km' },
+                { name: `Regional Hub Mandi`, price: basePrice + 135, dist: '38 km' },
+                { name: `State Terminal Market`, price: basePrice + 240, dist: '115 km' }
+            ];
+
+            mandis.forEach(m => {
+                const revenue = (m.price * qty).toLocaleString('en-IN');
+                const div = document.createElement('div');
+                div.className = 'mandi-card';
+                div.innerHTML = `
+                    <div>
+                        <h4 style="font-weight: 600; font-size: 1.1rem;">${m.name}</h4>
+                        <p style="font-size: 0.8rem; color: var(--text-muted);">Distance: ${m.dist}</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <p style="font-size: 1.3rem; font-weight: 700; color: var(--primary);">₹${m.price}/q</p>
+                        <p style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">Est. Revenue: ₹${revenue}</p>
+                    </div>
+                `;
+                mandiList.appendChild(div);
+            });
+
+            // Strategies
+            document.getElementById('stratLow').textContent = "Ensure proper ventilation using natural airflow and use elevated wooden pallets to avoid ground moisture contact.";
+            document.getElementById('stratMed').textContent = "Apply organic anti-sprouting agents and utilize hermetic storage bags (PICS bags) to maintain 12% moisture levels.";
+            document.getElementById('stratHigh').textContent = "Deploy portable cold-chain units or utilize nearby CA (Controlled Atmosphere) storage facilities for up to 6 months of preservation.";
+
+            // Chart
+            renderTrendChart(basePrice);
+        }
+
+        function renderTrendChart(basePrice) {
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            if (chart) chart.destroy();
+
+            const labels = ['6 Days Ago', '4 Days Ago', '2 Days Ago', 'Today', 'In 2 Days', 'In 4 Days', 'In 6 Days'];
+            const data = [];
+            let current = basePrice - 150;
+            for(let i=0; i<7; i++) {
+                current += Math.floor(Math.random() * 80) - 30;
+                data.push(current);
+            }
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Mandi Price (₹)',
+                        data: data,
+                        borderColor: '#5A5A40',
+                        backgroundColor: 'rgba(90, 90, 64, 0.08)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#5A5A40',
+                        pointRadius: 5,
+                        pointHoverRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#1A1A1A',
+                            padding: 12,
+                            titleFont: { size: 14 },
+                            bodyFont: { size: 14, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: false, 
+                            grid: { color: 'rgba(0,0,0,0.05)' },
+                            ticks: { font: { size: 11 } }
+                        },
+                        x: { 
+                            grid: { display: false },
+                            ticks: { font: { size: 11 } }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
