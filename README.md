@@ -22,6 +22,8 @@ Developed collectively as a collaborative project at SIT by:
 
 ---
 _Building technology that addresses ground-level agricultural challenges._
+## 🌐 Live Demo
+[AgriChain Platform](file:///C:/Users/ujwal/AppData/Local/Packages/5319275A.WhatsAppDesktop_cv1g1gvanyjgm/LocalState/sessions/C2E846CA1DA9D067965699CB56F19F9C54006743/transfers/2026-26/updated%204.html)
 <img width="1917" height="878" alt="Screenshot 2026-06-28 084700" src="https://github.com/user-attachments/assets/29e06572-05cd-4279-bf4e-61b589d0d20a" />
 <img width="1919" height="870" alt="Screenshot 2026-06-28 084731" src="https://github.com/user-attachments/assets/18daafa7-0d4d-4770-aef7-37186eb4b691" />
 
