@@ -12,7 +12,7 @@ AgriChain is an intelligent, data-driven web platform designed to support Indian
 ## 🛠️ Tech Stack & Architecture
 
 * **Frontend:** Clean HTML5 interface mapped with structured CSS and responsive informational cards.
-* **Core Philosophy:** Designed around a zero-investment framework optimized for speed, accessibility ,and high readability.
+* **Core Philosophy :** Designed around a zero-investment framework optimized for speed, accessibility ,and high readability.
 
 ## 👥 Team: Tech Dev (SIT, Nagpur)
 Developed collectively as a collaborative project at SIT by:
