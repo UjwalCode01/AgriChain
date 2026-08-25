@@ -1,6 +1,6 @@
 # AgriChain: Empowering Indian Farmers with Intelligent Insights 🌾🤖
 
-AgriChain is an intelligent, data-driven web platform designed to support Indian farmers by minimizing post-harvest losses and optimizing market routing. Built with structural simplicity, the platform delivers critical real-time parameters directly onto user-friendly layouts accessible even on basic mobile devices.
+AgriChain is an the  intelligent, data-driven web platform designed to support Indian farmers by minimizing post-harvest losses and optimizing market routing. Built with structural simplicity, the platform delivers critical real-time parameters directly onto user-friendly layouts accessible even on basic mobile devices.
 
 ## 🚀 Key Features
 
